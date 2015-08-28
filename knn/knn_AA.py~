@@ -104,24 +104,23 @@ class Knearest:
         # Finish this function to build a dictionary with the ############################################################################
         # mislabeled examples.  You'll need to call the classify
         # function for each example.
-	# AA CHANGE: Ok now this function checks through the example data, classifies it by knn, and checks against a truth label to report accuracy.
+
         d = defaultdict(dict)
         data_index = 0
-        for xx, yy in zip(test_x, test_y): # Loop through the indicies
+        for xx, yy in zip(test_x, test_y):
             data_index += 1
             if data_index % 100 == 0:
-                print("%i/%i for confusion matrix" % (data_index, len(test_x)))  # Periodic debug statement
-            test_val = test_x[data_index-1] # our test data
-            pred_y = self.classify(test_val) # make a prediction using knn for our test data
-            true_y = test_y[data_index-1] # find the truth label
-            pred_y = int(pred_y) # just cast as ints real quick for indexing
+                print("%i/%i for confusion matrix" % (data_index, len(test_x)))
+            test_val = test_x[data_index-1]
+            pred_y = self.classify(test_val)
+            true_y = test_y[data_index-1]
+            pred_y = int(pred_y)
             true_y = int(true_y)
-            if d.get(true_y,{}).get(pred_y,None)==None: # If there's no index here yet:
-                d[true_y][pred_y]=1 # initialize one
+            if d.get(true_y,{}).get(pred_y,None)==None:
+                d[true_y][pred_y]=1
             else:
-                d[true_y][pred_y]+=1 # otherwise incrament it 
-        return d # return that dictionary of test counts
-		 # if it worked perfectly, there would only be entries on the diagonal, misdetections will show up as values in off diagonal terms
+                d[true_y][pred_y]+=1
+        return d
 
     @staticmethod
     def acccuracy(confusion_matrix):
@@ -130,7 +129,7 @@ class Knearest:
         """
 
         # You do not need to modify this function
-	# AA CHANGE: I do not need to modify this function...
+
         total = 0
         correct = 0
         for ii in confusion_matrix:
