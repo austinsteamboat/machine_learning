@@ -1,0 +1,61 @@
+Log Regression notes:
+---------------------
+- binomial distribution
+- it's got a bias term 
+the i's are
+set of features
+the j's are 
+set of all the sets of examples
+ie xj has i features and there are j of those sets
+"I plead the 5th"
+
+epoch is t? ok sure
+it's an iteration 
+B -> is the size of the vocab + 1 (for the bias)
+
+how to choose the step size? 
+A: guess and check
+lambda or eta is your step size for the optimization 
+equation:
+B_new = B_old + step_size*(label_i-pi_i)*x_i
+
+label_i-pi_i is somewhere between 1 and -1
+step size is unitless
+so beta is getting adjusted by a scaled x
+
+oh oh oh ok
+so your x's are the counts!
+so bias is count of 1
+if example is:
+AAAABBBC
+x0 = 1
+xA = 4
+xB = 3
+xC = 1
+
+Space:
+iterations
+examples
+vocab size or x size
+
+so your pi_i's get updated for each example in batch 
+notation is sloppy on the pi_i formula so you're doing that for the whole example set
+
+
+right so we only iterate for every example because the 
+optimization is running for all the examples as we go
+we don't re-iterate on the same examples 
+
+Regularization
+just keep the betas from running off
+you just add it as an additional step every m iterations
+IMPORTANT: don't perform it on non-zero values 
+regulariztion term in mu
+
+
+
+
+
+
+
+
