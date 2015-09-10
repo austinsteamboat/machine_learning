@@ -59,7 +59,7 @@ class Example:
 
 
 class LogReg:
-    def __init__(self, num_features, mu, step=lambda x: 0.05): # look into what that lambda fellow is doing
+    def __init__(self, num_features, mu, step): # look into what that lambda fellow is doing =lambda x: 0.05
         """
         Create a logistic regression classifier
 
@@ -128,7 +128,7 @@ class LogReg:
         # don't know what tfidf is... 
         # calculate pi_i
         #self.step = step_update(iteration)
-	self.step = 0.1
+
         if(iteration==0):
             self.last_update = zeros(len(train_example.x))
 
@@ -258,6 +258,8 @@ if __name__ == "__main__":
     plt.title('Probability')
     plt.legend(["Tennis","Hockey"])
     plt.grid(True)
+    plt.figure(2)
+    plt.plot(beta_vec)
     plt.show()
 
 
