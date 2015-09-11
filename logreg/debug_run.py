@@ -1,6 +1,6 @@
 import unittest
 import operator
-from numpy import zeros, sign, dot, inner
+from numpy import zeros, sign, dot, inner, spacing
 from numpy import linalg as LA
 from logreg import LogReg, Example, sigmoid
 
@@ -56,4 +56,4 @@ for i in range(2):
 		
 print x_max
 print x_min
-
+print spacing(1)

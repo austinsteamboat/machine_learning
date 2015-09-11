@@ -9,8 +9,8 @@ kNEG = Example(0, "B:1 C:3 D:4".split(), kTOY_VOCAB, None)
 
 class TestKnn(unittest.TestCase):
     def setUp(self):
-        self.logreg_unreg = LogReg(5, 0.0, lambda x: 1.0)
-        self.logreg_reg = LogReg(5, 0.01, lambda x: 1.0)
+        self.logreg_unreg = LogReg(5, 0.0, 1.0)
+        self.logreg_reg = LogReg(5, 0.25, 1.0)
 
     def test_aunreg(self):
         beta = self.logreg_unreg.sg_update(kPOS, 0)
@@ -49,7 +49,4 @@ class TestKnn(unittest.TestCase):
         self.assertAlmostEqual(beta[4], -0.85195280196831058)
 
 if __name__ == '__main__':
-    plt.plot([1,2,3,4])
-    plt.ylabel('some numbers')
-    plt.show()
     unittest.main()

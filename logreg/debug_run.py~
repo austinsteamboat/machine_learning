@@ -49,11 +49,11 @@ asc_x = sorted(d.items(), key=operator.itemgetter(1),reverse = True)
 des_x = sorted(d.items(), key=operator.itemgetter(1))
 print d
 x_max = range(2)
+x_min = range(2)
 for i in range(2):
-    x_max[i] = sorted_x[i][0]
-	
-print x_out
-print kTOY_VOCAB
-print kOUT.beta
-#print debug_out
+    x_max[i] = asc_x[i][0]
+    x_min[i] = des_x[i][0]
+		
+print x_max
+print x_min
 

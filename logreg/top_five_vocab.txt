@@ -1,0 +1,22 @@
+No reg:
+Baseball:
+hit, runs, baseball, pitching, bat
+Hockey:
+hockey, playoffs, goals, next, playoff
+For:
+step = 0.05
+reg = 0.0
+Low for the same:
+tone, blasted, memoriam, pitiful, bloody, everywhere, deceased, broad, silence, racist
+
+0.1 reg:
+['individual', 'baseball', 'best', 'better', 'average']
+['games', 'hockey', 'teams', 'go', 'defense']
+['tone', 'blasted', 'memoriam', 'pitiful', 'bloody', 'everywhere', 'deceased', 'broad', 'silence', 'racist']
+
+0.25 reg:
+['average', 'year', 'individual', 'baseball', 'would']
+['games', 'go', 'free', 'get', 'front']
+['tone', 'blasted', 'memoriam', 'pitiful', 'bloody', 'everywhere', 'deceased', 'broad', 'silence', 'racist']
+
+
