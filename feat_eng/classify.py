@@ -1,3 +1,4 @@
+import time
 from csv import DictReader, DictWriter
 
 import numpy as np
@@ -9,15 +10,18 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
-from nltk.stem.porter import *
+from imdb import IMDb
+ia = IMDb()
 
 kTARGET_FIELD = 'spoiler'
 kTEXT_FIELD = 'sentence'
-
+kPAGE_FIELD = 'page'
+kTROPE_FIELD = 'trope'
+global_count = 0
 
 class Featurizer:
     def __init__(self):
-        self.vectorizer = TfidfVectorizer(analyzer='word',strip_accents='ascii',ngram_range=(1,4),stop_words='english') #TfidfVectorizer() #CountVectorizer()
+        self.vectorizer = TfidfVectorizer(analyzer=my_analyzer,strip_accents='ascii',ngram_range=(1,4),stop_words='english') #TfidfVectorizer() #CountVectorizer()
 
     def train_feature(self, examples):
         return self.vectorizer.fit_transform(examples)
@@ -28,13 +32,13 @@ class Featurizer:
     def show_top10(self, classifier, categories):
         feature_names = np.asarray(self.vectorizer.get_feature_names())
         if len(categories) == 2:
-            top10 = np.argsort(classifier.coef_[0])[-10:]
-            bottom10 = np.argsort(classifier.coef_[0])[:10]
+            top10 = np.argsort(classifier.coef_[0])[-20:]
+            bottom10 = np.argsort(classifier.coef_[0])[:20]
             print("Pos: %s" % " ".join(feature_names[top10]))
             print("Neg: %s" % " ".join(feature_names[bottom10]))
         else:
             for i, category in enumerate(categories):
-                top10 = np.argsort(classifier.coef_[i])[-10:]
+                top10 = np.argsort(classifier.coef_[i])[-20:]
                 print("%s: %s" % (category, " ".join(feature_names[top10])))
 
 
@@ -44,10 +48,44 @@ def accuracy(classifier, x, y):
     #cm = confusion_matrix(y, predictions)
 
     print("Accuracy: %f" % accuracy_score(y, predictions))
+	
+def my_analyzer(s):
+    global global_count
+    global_count+=1
+    if (global_count % 100 == 0):
+	if(type(s)==dict):
+	    s1 = s[kTEXT_FIELD]
+	    s2 = s1.split()
+	    len_val = len(s2)
+	    # Yield the word and touple
+	    for jj in range(0,len_val):
+	        s3 = s2[jj]
+	        yield s3
+	        if(jj>0):
+		    yield s2[jj-1]+" "+s3
+	        if(jj<(len_val-2)):
+		    yield s3+" "+s2[jj+1]
+
+	    # Yield the whole sentence
+	    yield s1
+	    # Ok one of the funny ones
+	    movie_list = ia.search_movie(s[kPAGE_FIELD])
+	    if(len(movie_list)>0):
+	        first_match = movie_list[0]
+		try:
+	            fm = ia.get_movie(first_match.movieID)
+	            fm_g = fm['genre']
+	            for ii in fm_g:
+	    	        yield str(ii)
+		except: 
+		    print("Hung")
+
+        else:
+	    yield s
 
 
 if __name__ == "__main__":
-
+    start_time = time.time()
     # Cast to list to keep it all in memory
     train = list(DictReader(open("../data/spoilers/train.csv", 'r')))
     test = list(DictReader(open("../data/spoilers/test.csv", 'r')))
@@ -60,8 +98,10 @@ if __name__ == "__main__":
             labels.append(line[kTARGET_FIELD])
 
     print("Label set: %s" % str(labels))
-    x_train = feat.train_feature(x[kTEXT_FIELD] for x in train)
-    x_test = feat.test_feature(x[kTEXT_FIELD] for x in test)
+  
+    x_train = feat.train_feature(x for x in train)
+
+    x_test = feat.test_feature(x for x in test)
 
     y_train = array(list(labels.index(x[kTARGET_FIELD])
                          for x in train))
@@ -77,17 +117,13 @@ if __name__ == "__main__":
     # AA CHANGE: Add debug accuracy 
     print("TRAIN\n-------------------------")
     accuracy(lr,x_train,y_train)
-    dum_val = {x[kTEXT_FIELD] for x in train[1:2]}
-    stemmer = PorterStemmer()
-    t1 = list(dum_val)
-    t1 = t1.split()
-    singles = [stemmer.stem(plural) for plural in list(dum_val)]
-    print(dum_val)
-    print(singles)
-
     predictions = lr.predict(x_test)
+    print global_count
     o = DictWriter(open("predictions.csv", 'w'), ["id", "spoiler"])
     o.writeheader()
     for ii, pp in zip([x['id'] for x in test], predictions):
         d = {'id': ii, 'spoiler': labels[pp]}
         o.writerow(d)
+
+    end_time = time.time()
+    print end_time-start_time
