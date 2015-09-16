@@ -171,11 +171,19 @@ if __name__ == "__main__":
                         flags.one_before, flags.one_after, flags.characters,
                         flags.dictionary)
     vectorizer = HashingVectorizer(analyzer=analyzer)
-
+    d_ut = [ex for ex,tgt in  all_examples(flags.limit)]
+    for i in d_ut:
+        print(i)
+    
     x_train = vectorizer.fit_transform(ex for ex, tgt in
                                        all_examples(flags.limit))
     x_test = vectorizer.fit_transform(ex for ex, tgt in
                                       all_examples(flags.limit, train=False))
+    
+    print "Train-------------"
+    print x_train[:5]
+    print "Test-------------"
+    print x_test[:5]
 
     for ex, tgt in all_examples(1):
         print(" ".join(analyzer(ex)))
@@ -183,6 +191,8 @@ if __name__ == "__main__":
     y_train = array(list(tgt for ex, tgt in all_examples(flags.limit)))
     y_test = array(list(tgt for ex, tgt in
                         all_examples(flags.limit, train=False)))
+
+
 
     lr = SGDClassifier(loss='log', penalty='l2', shuffle=True)
     lr.fit(x_train, y_train)

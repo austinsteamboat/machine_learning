@@ -3,12 +3,13 @@ from csv import DictReader, DictWriter
 import numpy as np
 from numpy import array
 
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
 # AA CHANGE: Added for debugging and making features
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+from nltk.stem.porter import *
 
 kTARGET_FIELD = 'spoiler'
 kTEXT_FIELD = 'sentence'
@@ -16,7 +17,7 @@ kTEXT_FIELD = 'sentence'
 
 class Featurizer:
     def __init__(self):
-        self.vectorizer = CountVectorizer()
+        self.vectorizer = TfidfVectorizer(analyzer='word',strip_accents='ascii',ngram_range=(1,4),stop_words='english') #TfidfVectorizer() #CountVectorizer()
 
     def train_feature(self, examples):
         return self.vectorizer.fit_transform(examples)
@@ -76,11 +77,15 @@ if __name__ == "__main__":
     # AA CHANGE: Add debug accuracy 
     print("TRAIN\n-------------------------")
     accuracy(lr,x_train,y_train)
-
+    dum_val = {x[kTEXT_FIELD] for x in train[1:2]}
+    stemmer = PorterStemmer()
+    singles = [stemmer.stem(plural) for plural in list(dum_val)]
+    print(dum_val)
+    print(singles)
 
     predictions = lr.predict(x_test)
-    o = DictWriter(open("predictions.csv", 'w'), ["id", "cat"])
+    o = DictWriter(open("predictions.csv", 'w'), ["id", "spoiler"])
     o.writeheader()
     for ii, pp in zip([x['id'] for x in test], predictions):
-        d = {'id': ii, 'cat': labels[pp]}
+        d = {'id': ii, 'spoiler': labels[pp]}
         o.writerow(d)
