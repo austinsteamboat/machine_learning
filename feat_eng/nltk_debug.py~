@@ -6,5 +6,5 @@ t2 = pos_tag(words)
 print t2
 print type(t2)
 for ii in t2:
-    print ii[1]
+    print ii
     print type(ii)

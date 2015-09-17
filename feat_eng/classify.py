@@ -7,9 +7,13 @@ from numpy import array
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
 # AA CHANGE: Added for debugging and making features
+from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+from nltk.tokenize import word_tokenize
+from nltk.tag import pos_tag
+from nltk.corpus import wordnet as wn
 from imdb import IMDb
 ia = IMDb()
 
@@ -18,112 +22,158 @@ kTEXT_FIELD = 'sentence'
 kPAGE_FIELD = 'page'
 kTROPE_FIELD = 'trope'
 global_count = 0
-
+global_stop_list = ["a","am","an","any","is","it","he","she","they","i","her","him","we","then","out","he's","of","in","and","that","she's","i'm","the"]
+global_dead_list = ["dead","death","die","dies","died"]
+global_kill_list = ["kill","kills","killed","killing"]
 class Featurizer:
-    def __init__(self):
-        self.vectorizer = TfidfVectorizer(analyzer=my_analyzer,strip_accents='ascii',ngram_range=(1,4),stop_words='english') #TfidfVectorizer() #CountVectorizer()
+	def __init__(self):
+		self.vectorizer_a = TfidfVectorizer(analyzer='word',strip_accents='ascii',ngram_range=(1,8),stop_words='english') #TfidfVectorizer() #CountVectorizer()
+		self.vectorizer_b = TfidfVectorizer(analyzer='char',strip_accents='ascii',ngram_range=(1,4),stop_words='english') #TfidfVectorizer() #CountVectorizer()
+		self.vectorizer = TfidfVectorizer(analyzer=my_analyzer,strip_accents='ascii',ngram_range=(1,4),stop_words='english')
+		#self.vectorizer = FeatureUnion([("custom",self.vectorizer_custom)])#,("custom",self.vectorizer_custom)])#,("built in char",self.vectorizer_bc_in)])	
+	def train_feature(self, examples):
+		return self.vectorizer.fit_transform(examples)
 
-    def train_feature(self, examples):
-        return self.vectorizer.fit_transform(examples)
+	def test_feature(self, examples):
+		return self.vectorizer.transform(examples)
 
-    def test_feature(self, examples):
-        return self.vectorizer.transform(examples)
-
-    def show_top10(self, classifier, categories):
-        feature_names = np.asarray(self.vectorizer.get_feature_names())
-        if len(categories) == 2:
-            top10 = np.argsort(classifier.coef_[0])[-20:]
-            bottom10 = np.argsort(classifier.coef_[0])[:20]
-            print("Pos: %s" % " ".join(feature_names[top10]))
-            print("Neg: %s" % " ".join(feature_names[bottom10]))
-        else:
-            for i, category in enumerate(categories):
-                top10 = np.argsort(classifier.coef_[i])[-20:]
-                print("%s: %s" % (category, " ".join(feature_names[top10])))
+	def show_top10(self, classifier, categories):
+		feature_names = np.asarray(self.vectorizer.get_feature_names())
+		if len(categories) == 2:
+			top10 = np.argsort(classifier.coef_[0])[-20:]
+			bottom10 = np.argsort(classifier.coef_[0])[:20]
+			print("Pos: %s" % " ".join(feature_names[top10]))
+			print("Neg: %s" % " ".join(feature_names[bottom10]))
+		else:
+			for i, category in enumerate(categories):
+				top10 = np.argsort(classifier.coef_[i])[-20:]
+				print("%s: %s" % (category, " ".join(feature_names[top10])))
 
 
 # AA CHANGE: Added from example script
 def accuracy(classifier, x, y):
-    predictions = classifier.predict(x)
-    #cm = confusion_matrix(y, predictions)
+	predictions = classifier.predict(x)
+	#cm = confusion_matrix(y, predictions)
 
-    print("Accuracy: %f" % accuracy_score(y, predictions))
+	print("Accuracy: %f" % accuracy_score(y, predictions))
 	
 def my_analyzer(s):
-    global global_count
-    global_count+=1
-    if (global_count % 100 == 0):
-	if(type(s)==dict):
-	    s1 = s[kTEXT_FIELD]
-	    s2 = s1.split()
-	    len_val = len(s2)
-	    # Yield the word and touple
-	    for jj in range(0,len_val):
-	        s3 = s2[jj]
-	        yield s3
-	        if(jj>0):
-		    yield s2[jj-1]+" "+s3
-	        if(jj<(len_val-2)):
-		    yield s3+" "+s2[jj+1]
+	global global_count
+	global global_stop_list
+	global global_dead_list
+	global global_kill_list
+	stop_val = False
+	dead_val = False	
+	kill_val = False
+	name_val = False
+	global_count+=1
+	s1 = s[kTEXT_FIELD]
+	s11 = s1.lower()
+	s2 = s11.split()
+	len_val = len(s2)
+	# Yield the word and touple
+	for jj in range(0,len_val):
+		s3 = s2[jj]
+		for word in global_stop_list:
+			if(word==s3):
+				stop_val = True
 
-	    # Yield the whole sentence
-	    yield s1
-	    # Ok one of the funny ones
-	    movie_list = ia.search_movie(s[kPAGE_FIELD])
-	    if(len(movie_list)>0):
-	        first_match = movie_list[0]
-		try:
-	            fm = ia.get_movie(first_match.movieID)
-	            fm_g = fm['genre']
-	            for ii in fm_g:
-	    	        yield str(ii)
-		except: 
-		    print("Hung")
+		for word in global_kill_list:
+			if(word==s3):
+				kill_val = True
 
-        else:
-	    yield s
+		for word in global_dead_list:
+			if(word==s3):
+				dead_val = True
+		
+		word = word_tokenize(s3)
+		pos_val = pos_tag(word)	
+		
+		if(stop_val):
+			break
+		elif(dead_val):
+			yield "dead"
+		elif(kill_val):
+			yield "kill"
+		else:
+			yield s3
+
+		if(jj>0):
+			yield s2[jj-1]+" "+s3
+
+		if(jj<(len_val-2)):
+			yield s3+" "+s2[jj+1]
+
+		if(jj>1):
+			yield s2[jj-2]+" "+s2[jj-1]+" "+s3
+
+		if(jj<(len_val-3)):
+			yield s3+" "+s2[jj+1]+" "+s2[jj+2]	
+
+	# Yield the whole sentence
+	yield s1
+	# NLTK Processing
+	words = word_tokenize(s1)
+	pos_vals = pos_tag(words)
+	for ii in pos_vals:
+		yield str(ii[1])
+	# Ok one of the funny ones
+
+	if (global_count % 500 == 0):
+		movie_list = ia.search_movie(s[kPAGE_FIELD])
+		if(len(movie_list)>0):
+			first_match = movie_list[0]
+			yield first_match['year']
+			try:
+			   fm = ia.get_movie(first_match.movieID)
+			   fm_g = fm['genre']
+			   for ii in fm_g:
+				   yield str(ii)
+			except: 
+				print("Hung")
 
 
 if __name__ == "__main__":
-    start_time = time.time()
-    # Cast to list to keep it all in memory
-    train = list(DictReader(open("../data/spoilers/train.csv", 'r')))
-    test = list(DictReader(open("../data/spoilers/test.csv", 'r')))
+	start_time = time.time()
+	# Cast to list to keep it all in memory
+	train = list(DictReader(open("../data/spoilers/train.csv", 'r')))
+	test = list(DictReader(open("../data/spoilers/test.csv", 'r')))
 
-    feat = Featurizer()
+	feat = Featurizer()
 
-    labels = []
-    for line in train:
-        if not line[kTARGET_FIELD] in labels:
-            labels.append(line[kTARGET_FIELD])
+	labels = []
+	for line in train:
+		if not line[kTARGET_FIELD] in labels:
+			labels.append(line[kTARGET_FIELD])
 
-    print("Label set: %s" % str(labels))
+	print("Label set: %s" % str(labels))
   
-    x_train = feat.train_feature(x for x in train)
+	x_train = feat.train_feature(x for x in train)
+	#x_train = feat.train_feature(x[kTEXT_FIELD] for x in train)
+	x_test = feat.test_feature(x for x in test)
+	#x_test = feat.test_feature(x[kTEXT_FIELD] for x in test)
 
-    x_test = feat.test_feature(x for x in test)
+	y_train = array(list(labels.index(x[kTARGET_FIELD])
+						 for x in train))
 
-    y_train = array(list(labels.index(x[kTARGET_FIELD])
-                         for x in train))
+	print(len(train), len(y_train))
+	print(set(y_train))
 
-    print(len(train), len(y_train))
-    print(set(y_train))
+	# Train classifier
+	lr = SGDClassifier(loss='log', penalty='l2', shuffle=True)
+	lr.fit(x_train, y_train)
 
-    # Train classifier
-    lr = SGDClassifier(loss='log', penalty='l2', shuffle=True)
-    lr.fit(x_train, y_train)
+	feat.show_top10(lr, labels)
+	# AA CHANGE: Add debug accuracy 
+	print("TRAIN\n-------------------------")
+	accuracy(lr,x_train,y_train)
+	predictions = lr.predict(x_test)
+	print global_count
+	o = DictWriter(open("predictions.csv", 'w'), ["id", "spoiler"])
+	o.writeheader()
+	for ii, pp in zip([x['id'] for x in test], predictions):
+		d = {'id': ii, 'spoiler': labels[pp]}
+		o.writerow(d)
 
-    feat.show_top10(lr, labels)
-    # AA CHANGE: Add debug accuracy 
-    print("TRAIN\n-------------------------")
-    accuracy(lr,x_train,y_train)
-    predictions = lr.predict(x_test)
-    print global_count
-    o = DictWriter(open("predictions.csv", 'w'), ["id", "spoiler"])
-    o.writeheader()
-    for ii, pp in zip([x['id'] for x in test], predictions):
-        d = {'id': ii, 'spoiler': labels[pp]}
-        o.writerow(d)
-
-    end_time = time.time()
-    print end_time-start_time
+	end_time = time.time()
+	print end_time-start_time

@@ -146,9 +146,9 @@ if __name__ == "__main__":
     #x_train = feat.train_feature(ex for ex in all_examples(len(train),train))
     #x_test = feat.test_feature(ex for ex in all_examples(len(test),test))
     vectorizer = HashingVectorizer(analyzer=Analyzer)
-    x_train = vectorizer.fit_transform(ex for ex, tgt in
+    x_train = vectorizer.fit_transform(ex for ex in
                                        all_examples(len(train),(x[kTEXT_FIELD] for x in train)))
-    x_test = vectorizer.fit_transform(ex for ex, tgt in
+    x_test = vectorizer.fit_transform(ex for ex in
                                       all_examples(len(test),(x[kTEXT_FIELD] for x in test)))
 
     y_train = array(list(labels.index(x[kTARGET_FIELD])
