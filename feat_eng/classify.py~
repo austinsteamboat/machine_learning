@@ -21,10 +21,25 @@ kTARGET_FIELD = 'spoiler'
 kTEXT_FIELD = 'sentence'
 kPAGE_FIELD = 'page'
 kTROPE_FIELD = 'trope'
+# IMDB Data Processing
+kTITLE_FIELD = 'title'
+kGENRE_FIELD = 'genre'
+imdb_dict = list(DictReader(open("imdb_dict.csv", 'r')))
+title_vec = []
+genre_vec = []
+for ii in imdb_dict:
+	title_vec.append(ii[kTITLE_FIELD])
+	genre_vec.append(ii[kGENRE_FIELD])
+
+imdb_dict = dict(zip(title_vec, genre_vec))
+
 global_count = 0
 global_stop_list = ["a","am","an","any","is","it","he","she","they","i","her","him","we","then","out","he's","of","in","and","that","she's","i'm","the"]
 global_dead_list = ["dead","death","die","dies","died"]
 global_kill_list = ["kill","kills","killed","killing"]
+
+
+
 class Featurizer:
 	def __init__(self):
 		self.vectorizer_a = TfidfVectorizer(analyzer='word',strip_accents='ascii',ngram_range=(1,8),stop_words='english') #TfidfVectorizer() #CountVectorizer()
@@ -62,6 +77,7 @@ def my_analyzer(s):
 	global global_stop_list
 	global global_dead_list
 	global global_kill_list
+	global imdb_dict
 	stop_val = False
 	dead_val = False	
 	kill_val = False
@@ -76,7 +92,7 @@ def my_analyzer(s):
 		s3 = s2[jj]
 		for word in global_stop_list:
 			if(word==s3):
-				stop_val = True
+				stop_val = False
 
 		for word in global_kill_list:
 			if(word==s3):
@@ -104,37 +120,26 @@ def my_analyzer(s):
 		if(jj<(len_val-2)):
 			yield s3+" "+s2[jj+1]
 
-		if(jj>1):
-			yield s2[jj-2]+" "+s2[jj-1]+" "+s3
+		#if(jj>1):
+		#	yield s2[jj-2]+" "+s2[jj-1]+" "+s3
 
-		if(jj<(len_val-3)):
-			yield s3+" "+s2[jj+1]+" "+s2[jj+2]
-
-	dictionary = ["ADJ"] * len(wn.synsets(word, wn.ADJ)) + ["ADV"] * len(wn.synsets(word, wn.ADV)) + ["VERB"] * len(wn.synsets(word, wn.VERB)) + ["NOUN"] * len(wn.synsets(word, wn.NOUN))
-	dictionary = " " + " ".join(dictionary)
-	yield dictionary	
+		#if(jj<(len_val-3)):
+		#	yield s3+" "+s2[jj+1]+" "+s2[jj+2]	
 
 	# Yield the whole sentence
 	yield s1
 	# NLTK Processing
-	words = word_tokenize(s1)
-	pos_vals = pos_tag(words)
-	for ii in pos_vals:
-		yield str(ii[1])
-	# Ok one of the funny ones
-
-	if (global_count % 500 == 0):
-		movie_list = ia.search_movie(s[kPAGE_FIELD])
-		if(len(movie_list)>0):
-			first_match = movie_list[0]
-			yield first_match['year']
-			try:
-			   fm = ia.get_movie(first_match.movieID)
-			   fm_g = fm['genre']
-			   for ii in fm_g:
-				   yield str(ii)
-			except: 
-				print("Hung")
+	#words = word_tokenize(s1)
+	#pos_vals = pos_tag(words)
+	#for ii in pos_vals:
+	#	yield str(ii[1])
+	# 
+	key_str = s[kPAGE_FIELD]
+	genre_string = imdb_dict[key_str]
+	genre_list = genre_string.split()
+	for ii in genre_list:
+		yield ii
+	
 
 
 if __name__ == "__main__":

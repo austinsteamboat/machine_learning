@@ -8,6 +8,7 @@ movie_list = ia.search_movie(str_val)
 first_match = movie_list[0]
 found_time = time.time()
 fm = ia.get_movie(first_match.movieID)
+fm['genre']
 got_mov = time.time()
 attrs = vars(fm)
 print first_match['kind']
