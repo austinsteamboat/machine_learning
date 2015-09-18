@@ -42,9 +42,10 @@ global_kill_list = ["kill","kills","killed","killing"]
 
 class Featurizer:
 	def __init__(self):
-		self.vectorizer_a = TfidfVectorizer(analyzer='word',strip_accents='ascii',ngram_range=(1,8),stop_words='english') #TfidfVectorizer() #CountVectorizer()
-		self.vectorizer_b = TfidfVectorizer(analyzer='char',strip_accents='ascii',ngram_range=(1,4),stop_words='english') #TfidfVectorizer() #CountVectorizer()
-		self.vectorizer = TfidfVectorizer(analyzer=my_analyzer,strip_accents='ascii',ngram_range=(1,4),stop_words='english')
+		self.vectorizer = CountVectorizer(analyzer='word',ngram_range=(1,8))#(analyzer='word',strip_accents='ascii',ngram_range=(1,8),stop_words='english') #TfidfVectorizer() #CountVectorizer()
+		#self.vectorizer_b = TfidfVectorizer(analyzer='char',strip_accents='ascii',ngram_range=(1,4),stop_words='english') #TfidfVectorizer() #CountVectorizer()
+		#self.vectorizer = TfidfVectorizer(analyzer=my_analyzer)
+		#self.vectorizer = CountVectorizer(analyzer=my_analyzer)
 		#self.vectorizer = FeatureUnion([("custom",self.vectorizer_custom)])#,("custom",self.vectorizer_custom)])#,("built in char",self.vectorizer_bc_in)])	
 	def train_feature(self, examples):
 		return self.vectorizer.fit_transform(examples)
@@ -102,8 +103,8 @@ def my_analyzer(s):
 			if(word==s3):
 				dead_val = False
 		
-		word = word_tokenize(s3)
-		pos_val = pos_tag(word)	
+		#word = word_tokenize(s3)
+		#pos_val = pos_tag(word)	
 		
 		if(stop_val):
 			break
@@ -114,20 +115,20 @@ def my_analyzer(s):
 		else:
 			yield s3
 
-		#if(jj>0):
-		#	yield s2[jj-1]+" "+s3
+		if(jj>0):
+			yield s2[jj-1]+" "+s3
 
-		#if(jj<(len_val-2)):
-		#	yield s3+" "+s2[jj+1]
+		if(jj<(len_val-2)):
+			yield s3+" "+s2[jj+1]
 
-		#if(jj>1):
-		#	yield s2[jj-2]+" "+s2[jj-1]+" "+s3
+		if(jj>1):
+			yield s2[jj-2]+" "+s2[jj-1]+" "+s3
 
-		#if(jj<(len_val-3)):
-		#	yield s3+" "+s2[jj+1]+" "+s2[jj+2]	
+		if(jj<(len_val-3)):
+			yield s3+" "+s2[jj+1]+" "+s2[jj+2]	
 
 	# Yield the whole sentence
-	yield s1
+	#yield s1
 	# NLTK Processing
 	#words = word_tokenize(s1)
 	#pos_vals = pos_tag(words)
@@ -157,10 +158,10 @@ if __name__ == "__main__":
 
 	print("Label set: %s" % str(labels))
   
-	x_train = feat.train_feature(x for x in train)
-	#x_train = feat.train_feature(x[kTEXT_FIELD] for x in train)
-	x_test = feat.test_feature(x for x in test)
-	#x_test = feat.test_feature(x[kTEXT_FIELD] for x in test)
+	#x_train = feat.train_feature(x for x in train)
+	x_train = feat.train_feature(str(x[kTEXT_FIELD]+" "+str(imdb_dict[x[kPAGE_FIELD]])) for x in train)
+	#x_test = feat.test_feature(x for x in test)
+	x_test = feat.test_feature(str(x[kTEXT_FIELD]+" "+str(imdb_dict[x[kPAGE_FIELD]])) for x in test)
 
 	y_train = array(list(labels.index(x[kTARGET_FIELD])
 						 for x in train))
