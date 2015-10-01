@@ -56,8 +56,7 @@ mm[:,0] = gg
 mm[:,1] = yy
 
 for ii in mm:
-	print ii[0]
-	print ii[1]
+	print ii
 
 #print mm
 #print "This is the new yy:"

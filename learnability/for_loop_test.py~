@@ -1,0 +1,21 @@
+from random import randint, seed
+from collections import defaultdict
+from math import atan, sin, cos, pi, ceil
+
+from numpy import array, spacing, divide, correlate, dot, sign, sort, unique, empty, ones, append, mean
+from numpy.linalg import norm
+
+from bst import BST
+
+kSIMPLE_DATA = [(1., 1.), (2., 2.), (3., 0.), (4., 2.)]
+
+for hh in xrange(len(kSIMPLE_DATA)):
+        if hh != 0:
+            print "a"
+        else:
+            print "b"
+                
+        for jj in xrange(3):
+            print "c"
+            for ii in xrange(2):
+                print "d"       
