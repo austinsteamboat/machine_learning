@@ -35,7 +35,7 @@ for ii in x_vec:
 
 for ii in y_vec:
 	Y_BST.insert(ii);
-
+# candidate for BST accel
 def make_a_rec(data_list,ind_list):
     eps = spacing(single(1))
     z = []
@@ -52,6 +52,33 @@ def make_a_rec(data_list,ind_list):
     min_max_ar = [x_min,y_min,x_max,y_max]
     min_max_ar = array(min_max_ar)
     return min_max_ar
+
+# bst version    
+def make_a_rec_bst(data_list,ind_list):
+    eps = spacing(single(1))
+    z = []
+    for ii in ind_list:
+        z.append(data_list[ii])
+    
+    z = 1.*array(z)
+    X_BST = BST();
+    Y_BST = BST();
+    x_vec = z[:,0]
+    y_vec = z[:,1]
+    for ii in x_vec:
+        X_BST.insert(ii);
+
+    for ii in y_vec:
+        Y_BST.insert(ii);
+        
+    x_min = min(x_vec)-eps
+    y_min = min(y_vec)-eps
+    x_max = max(x_vec)+eps
+    y_max = max(y_vec)+eps
+    min_max_ar = [x_min,y_min,x_max,y_max]
+    min_max_ar = array(min_max_ar)
+    return min_max_ar    
+    
     
 def make_null_rec(data_list):    
     eps = spacing(single(1))
@@ -79,7 +106,8 @@ def check_a_point(rec_ar,data_point):
     x_max = rec_ar[2]
     y_max = rec_ar[3]
     return ((x_min<dx) and (dx<x_max) and (y_min<dy) and (dy<y_max))
-    
+
+# candidate for BST accel    
 def check_a_rec(rec_ar,data_list):
     bool_list = []
     for ii in data_list:
@@ -124,7 +152,7 @@ HYP_DICT, REC_DICT = check_a_hyp(bool_out,null_rec,REC_DICT,HYP_DICT)
 #print HYP_DICT
 rec_vals = REC_DICT.values()
 for ii in rec_vals:
-    print type(ii[0])
+    print type(float(ii[0]))
 
 
 

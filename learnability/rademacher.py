@@ -2,7 +2,7 @@ from random import randint, seed
 from collections import defaultdict
 from math import atan, sin, cos, pi, ceil
 
-from numpy import array, single, spacing, divide, correlate, dot, sign, sort, unique, empty, ones, append, mean
+from numpy import array, single, spacing, divide, correlate, dot, sign, sort, unique, empty, ones, append, mean, isinf
 from numpy.linalg import norm
 from itertools import combinations
 from bst import BST
@@ -176,7 +176,10 @@ def origin_plane_hypotheses(dataset):
     # Initialize empty vector of interpolated boundaries for hypothesis 
     m_int_vec = empty(len(m_vec))
     for ii in range(0,len(m_vec)-1):
-        m_int_vec[ii] = (m_vec[ii+1]+m_vec[ii])/2
+        if(isinf(m_vec[ii+1])):
+            m_int_vec[ii] = 1.*m_vec[ii]+eps
+        else:
+            m_int_vec[ii] = 1.*(m_vec[ii+1]+m_vec[ii])/2.
     
     # The largest slope will get increased by machine precision and will be our final boundary
     m_int_vec[len(m_vec)-1] = m_vec[len(m_vec)-1]+eps
@@ -186,6 +189,13 @@ def origin_plane_hypotheses(dataset):
     mm = empty([len(m_int_vec),2])
     mm[:,0] = m_int_vec
     mm[:,1] = yy
+
+    # Run a quick check for inf case
+    for ii in xrange(len(mm)):
+     if(isinf(mm[ii][0])):
+         mm[ii][0] = 1.
+         mm[ii][1] = eps
+           
     ## Also append the inverse classifications
     mm = append(mm,-1*mm,axis=0)
     for ii in mm:
@@ -398,10 +408,7 @@ def rademacher_estimate(dataset, hypothesis_generator, num_samples=500,
     mean_out = mean(array(cor_mean_vec));
     return mean_out
 
-if __name__ == "__main__":
-    print("Rademacher correlation of constant classifier %f" %
-          rademacher_estimate([(0, 0)], constant_hypotheses, num_samples=1000,random_seed=3))
-         
+if __name__ == "__main__":        
     print("Rademacher correlation of constant classifier %f" %
           rademacher_estimate(kSIMPLE_DATA, constant_hypotheses))      
     print("Rademacher correlation of rectangle classifier %f" %
