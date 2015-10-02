@@ -67,8 +67,8 @@ def train_sin_classifier(data):
     # And I added some changes to improve performance
     # Like really small improvements, but meh, better than nothing.
     # I don't think anyone actually reads these comments....
-    data_ar = np.array(data) # put the whole thing in an array
-    x_vec = data_ar[:,0] # extract the x-vector
+    data_ar = np.array(data)
+    x_vec = data_ar[:,0]
     y_vec = 1.*np.logical_not(data_ar[:,1]) # Logical should be cheaper than subtract and divide
     xi_inv = 2.**(x_vec) # calculate the inverse here to eliminate a vectorwise divide
     frequency = (1.+sum(y_vec*xi_inv))# to be fair, it's actually 2*frequency as w = 2*pi*f....
