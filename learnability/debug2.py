@@ -121,9 +121,11 @@ HYP_DICT, REC_DICT = check_a_hyp(bool_out,null_rec,REC_DICT,HYP_DICT)
 
 #print bool_out
 #print rec1
-print HYP_DICT
-print REC_DICT
-print len(REC_DICT)
+#print HYP_DICT
+rec_vals = REC_DICT.values()
+for ii in rec_vals:
+    print type(float(ii[0]))
+
 
 
 

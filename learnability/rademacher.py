@@ -2,9 +2,9 @@ from random import randint, seed
 from collections import defaultdict
 from math import atan, sin, cos, pi, ceil
 
-from numpy import array, spacing, divide, correlate, dot, sign, sort, unique, empty, ones, append, mean
+from numpy import array, single, spacing, divide, correlate, dot, sign, sort, unique, empty, ones, append, mean
 from numpy.linalg import norm
-
+from itertools import combinations
 from bst import BST
 
 kSIMPLE_DATA = [(1., 1.), (2., 2.), (3., 0.), (4., 2.)]
@@ -159,7 +159,7 @@ def origin_plane_hypotheses(dataset):
 
     """
     # TODO: Complete this function
-    eps = spacing(1)
+    eps = spacing(single(1))
     # Put the data into an numpy array
     data_array = array(dataset);
     # Break out X,Y vector components
@@ -203,6 +203,78 @@ def plane_hypotheses(dataset):
     # Complete this for extra credit
     return
 
+# AA COMMENT: Begin axis_aligned_hypotheses helper functions
+def make_a_rec(data_list,ind_list):
+    eps = spacing(single(1))
+    z = []
+    for ii in ind_list:
+        z.append(data_list[ii])
+    
+    z = array(z)
+    x_vec = z[:,0]
+    y_vec = z[:,1]
+    x_min = min(x_vec)-eps
+    y_min = min(y_vec)-eps
+    x_max = max(x_vec)+eps
+    y_max = max(y_vec)+eps
+    min_max_ar = [x_min,y_min,x_max,y_max]
+    min_max_ar = array(min_max_ar)
+    return min_max_ar
+    
+def make_null_rec(data_list):    
+    eps = spacing(single(1))
+    z = []
+    for ii in data_list:
+        z.append(ii)
+    
+    z = array(z)
+    x_vec = z[:,0]
+    y_vec = z[:,1]
+    x_min = max(x_vec)+eps
+    y_min = max(y_vec)+eps
+    x_max = max(x_vec)+2*eps
+    y_max = max(y_vec)+2*eps
+    min_max_ar = [x_min,y_min,x_max,y_max]
+    min_max_ar = array(min_max_ar)
+    return min_max_ar
+
+
+def check_a_point(rec_ar,data_point):
+    dx = float(data_point[0])
+    dy = float(data_point[1])
+    x_min = rec_ar[0]
+    y_min = rec_ar[1]
+    x_max = rec_ar[2]
+    y_max = rec_ar[3]
+    return ((x_min<dx) and (dx<x_max) and (y_min<dy) and (dy<y_max))
+    
+def check_a_rec(rec_ar,data_list):
+    bool_list = []
+    for ii in data_list:
+        bool_val = check_a_point(rec_ar,ii)
+        bool_list.append(bool_val)
+        
+    return bool_list
+    
+def check_a_hyp(bool_list,rec_ar,rec_dict,hypo_dict):
+    if not(bool_list in hypo_dict.values()):
+        key_num = len(hypo_dict)+1
+        hypo_dict[key_num] = bool_list
+        rec_dict[key_num] = rec_ar
+    
+    return hypo_dict, rec_dict
+                    
+def itter_gen(data_len):
+    it_lo = []
+    dum_list = list(xrange(data_len))
+    for xx in xrange(data_len):
+        dum_gen = combinations(dum_list,xx+1)
+        for jj in dum_gen:
+            it_lo.append(jj)
+        
+    return it_lo
+
+# AA COMMENT: End axis_aligned_hypothese helper functions
 
 def axis_aligned_hypotheses(dataset):
     """
@@ -216,7 +288,34 @@ def axis_aligned_hypotheses(dataset):
     """
 
     # TODO: complete this function
-    yield AxisAlignedRectangle(0, 0, 0, 0)
+    # Machine precision value to give minimal headroom around rectangles
+    eps = spacing(single(1))
+    # Generate all the index combinations to consider for a Broot force solver
+    ind_it = itter_gen(len(dataset))
+    # Make empty dictionaries to hold our rectangle classifiers and their boolean hypotheses
+    REC_DICT = defaultdict(array);        
+    HYP_DICT = defaultdict(list);
+    # Iterate through all the hypotheses
+    for ii in ind_it: 
+        # List of indecies to consider   
+        ind_list = ii
+        # Make a hypothesis rectangle from the list
+        rec_hyp =  make_a_rec(dataset,ind_list)
+        # See how it classifies the points
+        bool_out = check_a_rec(rec_hyp,dataset)
+        # Check this rectangle hypothesis and its classification list agains the dictionaries
+        # Update the dictionaries if this one isn't in there yet
+        HYP_DICT, REC_DICT = check_a_hyp(bool_out,rec_hyp,REC_DICT,HYP_DICT)
+    
+    # The last thing to do is generate a null-hypothesis rectangle
+    # This wouldn't be generate from the points by themselves as 
+    # those steps always result in at least one inclusion
+    null_rec = make_null_rec(dataset)
+    bool_out = check_a_rec(null_rec,dataset)
+    HYP_DICT, REC_DICT = check_a_hyp(bool_out,null_rec,REC_DICT,HYP_DICT)
+    rec_vals = REC_DICT.values()
+    for ii in rec_vals:
+        yield AxisAlignedRectangle(float(ii[0]), float(ii[1]), float(ii[2]), float(ii[3]))
 
 
 def coin_tosses(number, random_seed=0):
@@ -281,7 +380,7 @@ if __name__ == "__main__":
          
     print("Rademacher correlation of constant classifier %f" %
           rademacher_estimate(kSIMPLE_DATA, constant_hypotheses))      
-    #print("Rademacher correlation of rectangle classifier %f" %
-          #rademacher_estimate(kSIMPLE_DATA, axis_aligned_hypotheses))
+    print("Rademacher correlation of rectangle classifier %f" %
+          rademacher_estimate(kSIMPLE_DATA, axis_aligned_hypotheses))
     print("Rademacher correlation of plane classifier %f" %
           rademacher_estimate(kSIMPLE_DATA, origin_plane_hypotheses))

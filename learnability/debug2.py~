@@ -62,10 +62,10 @@ def make_null_rec(data_list):
     z = array(z)
     x_vec = z[:,0]
     y_vec = z[:,1]
-    x_min = 2*max(x_vec)-eps
-    y_min = 2*max(y_vec)-eps
-    x_max = 2*max(x_vec)+eps
-    y_max = 2*max(y_vec)+eps
+    x_min = max(x_vec)+eps
+    y_min = max(y_vec)+eps
+    x_max = max(x_vec)+2*eps
+    y_max = max(y_vec)+2*eps
     min_max_ar = [x_min,y_min,x_max,y_max]
     min_max_ar = array(min_max_ar)
     return min_max_ar
@@ -121,9 +121,11 @@ HYP_DICT, REC_DICT = check_a_hyp(bool_out,null_rec,REC_DICT,HYP_DICT)
 
 #print bool_out
 #print rec1
-print HYP_DICT
-print REC_DICT
-print len(REC_DICT)
+#print HYP_DICT
+rec_vals = REC_DICT.values()
+for ii in rec_vals:
+    print type(ii[0])
+
 
 
 
