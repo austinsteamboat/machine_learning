@@ -26,13 +26,17 @@ class Classifier:
 
         assert all(x == 1 or x == -1 for x in labels), "Labels must be binary"
         
+        # Cast labels as an array for a dot product
         labels = array(labels)
-        # Convert data from bool (0,1) to -1,+1
+        # classify the data point, classification list is boolean
         data_lab = []
         for ii in data:
             data_lab.append(self.classify(ii))
         
+        # Convert data from bool (0,1) to -1,+1        
         data_lab = array(data_lab)*2-1
+        # return our correlation value which is the dot product of the 
+        # random labels and hypothesis predictions normalized by the data length
         cor_val = float(dot(data_lab,labels))/float(len(data_lab)) 
         return cor_val
 
@@ -158,7 +162,7 @@ def origin_plane_hypotheses(dataset):
       dataset: The dataset to use to generate hypotheses
 
     """
-    # TODO: Complete this function
+    # Machine precision
     eps = spacing(single(1))
     # Put the data into an numpy array
     data_array = array(dataset);
@@ -182,6 +186,7 @@ def origin_plane_hypotheses(dataset):
     mm = empty([len(m_int_vec),2])
     mm[:,0] = m_int_vec
     mm[:,1] = yy
+    ## Also append the inverse classifications
     mm = append(mm,-1*mm,axis=0)
     for ii in mm:
         yield OriginPlaneHypothesis(ii[0],ii[1])
@@ -204,6 +209,12 @@ def plane_hypotheses(dataset):
     return
 
 # AA COMMENT: Begin axis_aligned_hypotheses helper functions
+# Make a rectangle hypothesis from a list of input data and 
+# indicies for entries in that list
+# Does this by taking min, max of list and subtracting/adding machine precision 
+# to give minimum head room
+# Returns an array of min,max values
+# candidate for BST accel
 def make_a_rec(data_list,ind_list):
     eps = spacing(single(1))
     z = []
@@ -221,6 +232,9 @@ def make_a_rec(data_list,ind_list):
     min_max_ar = array(min_max_ar)
     return min_max_ar
     
+# Make a null rectangle that yields all false values
+# we do this by making an infentesmial box outside max(x),max(y),max(x),max(y) 
+# nothing should fall in this box so we should get a false response.   
 def make_null_rec(data_list):    
     eps = spacing(single(1))
     z = []
@@ -238,7 +252,9 @@ def make_null_rec(data_list):
     min_max_ar = array(min_max_ar)
     return min_max_ar
 
-
+# Check if one point is in the rectangle.
+# candidate for BST acceleartion
+# returns a boolean value True if it's in the rectangle, false if it's out
 def check_a_point(rec_ar,data_point):
     dx = float(data_point[0])
     dy = float(data_point[1])
@@ -248,6 +264,9 @@ def check_a_point(rec_ar,data_point):
     y_max = rec_ar[3]
     return ((x_min<dx) and (dx<x_max) and (y_min<dy) and (dy<y_max))
     
+# Check the whole data list by calling 
+# check_a_point for each data point
+# returns a boolean classifier list    
 def check_a_rec(rec_ar,data_list):
     bool_list = []
     for ii in data_list:
@@ -255,7 +274,11 @@ def check_a_rec(rec_ar,data_list):
         bool_list.append(bool_val)
         
     return bool_list
-    
+
+# Checks a rectangle and boolean predicition hypothesis against a running 
+# dictionary of boolean predictions. If the hypothesis is new,
+# the rectangle dictionary is updated along with the boolean hypothesis
+# dictionary. The dictionaries are returned.    
 def check_a_hyp(bool_list,rec_ar,rec_dict,hypo_dict):
     if not(bool_list in hypo_dict.values()):
         key_num = len(hypo_dict)+1
@@ -264,6 +287,9 @@ def check_a_hyp(bool_list,rec_ar,rec_dict,hypo_dict):
     
     return hypo_dict, rec_dict
                     
+# This function generates all the index combinations 
+# for all possible non-zero lengths for a particular data length
+# It returns a list of these values.                     
 def itter_gen(data_len):
     it_lo = []
     dum_list = list(xrange(data_len))
@@ -287,7 +313,6 @@ def axis_aligned_hypotheses(dataset):
       dataset: The dataset to use to generate hypotheses
     """
 
-    # TODO: complete this function
     # Machine precision value to give minimal headroom around rectangles
     eps = spacing(single(1))
     # Generate all the index combinations to consider for a Broot force solver
@@ -348,7 +373,6 @@ def rademacher_estimate(dataset, hypothesis_generator, num_samples=500,
       num_samples: the number of samples to use in estimating the Rademacher
       correlation
     """
-    # TODO: complete this function
     # Make an empty vector to hold the correlation results for each step to take the mean 
     cor_mean_vec = []
     # Iterate over num_samples to get an expected value
