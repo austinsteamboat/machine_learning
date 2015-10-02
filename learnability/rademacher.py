@@ -250,7 +250,7 @@ def rademacher_estimate(dataset, hypothesis_generator, num_samples=500,
       correlation
     """
     # TODO: complete this function
-    # Max an empty vector to hold the correlation results for each step to take the mean 
+    # Make an empty vector to hold the correlation results for each step to take the mean 
     cor_mean_vec = []
     # Iterate over num_samples to get an expected value
     for hh in xrange(num_samples):
@@ -262,18 +262,18 @@ def rademacher_estimate(dataset, hypothesis_generator, num_samples=500,
         
         # Make sure to regenerate the hypothesis set EACH time!        
         h_gen = hypothesis_generator(dataset);
+        # Make a vector to hold the correlation results for our set of hypotheses
         dat_cor = []
+        # Loop through all hypotheses and save the correlation results for each one
         for ii in h_gen:
             dat_cor.append(ii.correlation(dataset,rand_lab))
-            
-        #print dat_cor
-        tt = max(dat_cor)
-        cor_mean_vec.append(tt)
+                
+        # Append the max result of looping through one hypotheses set, will end up being num_samples long       
+        cor_mean_vec.append(max(dat_cor))
         
-    #print cor_mean_vec
+    # To finish the rademacher estimate, take the expected value of our runs
     mean_out = mean(array(cor_mean_vec));
-    # return the correlation
-    return mean_out#
+    return mean_out
 
 if __name__ == "__main__":
     print("Rademacher correlation of constant classifier %f" %

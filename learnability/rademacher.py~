@@ -250,7 +250,7 @@ def rademacher_estimate(dataset, hypothesis_generator, num_samples=500,
       correlation
     """
     # TODO: complete this function
-    # Max an empty vector to hold the correlation results for each step to take the mean 
+    # Make an empty vector to hold the correlation results for each step to take the mean 
     cor_mean_vec = []
     # Iterate over num_samples to get an expected value
     for hh in xrange(num_samples):
