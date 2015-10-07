@@ -23,7 +23,11 @@ def weight_vector(x, y, alpha):
     """
     Given a vector of alphas, compute the primal weight vector.
     """
-
+    # AA COMMENTS:
+    """
+    So this just calculates weights given alpha per the equation 
+    in the SVM slides. That's it. 
+    """
     w = zeros(len(x[0]))
     
     for ii in xrange(len(y)):
@@ -69,8 +73,8 @@ def find_slack(x, y, w, b):
     slack = set()
     for ii in xrange(len(y)):
         test_val = y[ii]*(dot(w,x[ii])+b)
-        #print test_val
-        if (test_val<0.0):
+        print test_val
+        if (test_val<1.0):
             slack.add(ii)
 
     return slack

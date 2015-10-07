@@ -74,7 +74,7 @@ def find_slack(x, y, w, b):
     for ii in xrange(len(y)):
         test_val = y[ii]*(dot(w,x[ii])+b)
         #print test_val
-        if (test_val<0.0):
+        if (test_val<1.0):
             slack.add(ii)
 
     return slack
