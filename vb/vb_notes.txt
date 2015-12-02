@@ -1,0 +1,57 @@
+Q's?
+----
+What is LDA?
+Latent Dirichlet Allocation 
+What is variational Bayes?
+Variational Inference
+What lectures/readings are relevant? 
+18a/19a/19b 
+
+ELBO -> Evidence lower bound
+alpha -> scalar, parameter for multinomial distribution 
+Beta -> matrix, v x k matrix (vocab by topics), B_i_j prop to sum over d sum over n (phi_d_n_i*w_d_n^j)
+	 -> Normalize for prop
+	 -> Multinomial distribution 
+	 -> Over whole vocabulary
+gamma -> matrix (D x k, docs by topics), gamma_i = alpha_i + Sum over n(phi_n_i)
+	  -> variational document distribution over topics 
+	  -> over topics for each document 
+phi -> phi_n_i proporitional to B_i_v*exp(psi(gamma_i)-psi(sum over j(gamma_j))
+	-> normalize for prop
+	-> over documents it looks like 
+theta -> multinomial distribution 
+z -> hidden topic 
+q -> variational distribution to approximate posterior for inferring hidden variables 
+d -> each document 
+k -> each topic 
+n -> each word position 
+j -> lagrange parameter? 
+wn -> observed word from the distribution Beta
+L -> Log Likelihood function L(
+v -> vocab
+psi -> digamma function gamma_prime(x)/gamma(x) 
+gamma function -> gamma(x) = (x-1)!
+iterations? -> i I think...
+
+Generally
+f(documents,words) = topics
+
+Alg:
+1. Randomly initialize variational paramters
+Q: What are variational parameters?
+A: They're the phi's prop to Biv*exp(psi(gamma_i)-psi(sum over j(gamma_j))
+2. For each iteration 
+	1. For each document update gamma, phi
+	2. For corpus update Beta
+	3. Compute L for diagnostics 
+3. Return expectation of variational parameters for solution to latent variables  
+
+Coding:
+--------
+1. new_phi
+ given gamma vec over topics for given doc/ Beta matrix for a word with a given count
+ -> gamma is 1xtopics in size, Beta is vocab x topics in size 
+ -> Beta is matrix Biv (v x k, vocab size x topic)
+ -> needs digamma and exponent functions 
+ -> Needs normalization  
+

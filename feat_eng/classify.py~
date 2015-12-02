@@ -40,11 +40,14 @@ global_kill_list = ["kill","kills","killed","killing"]
 # So the way that I actually look at different feature extraction methods are to uncomment the vectorizer I want in the featurizer class
 # then uncomment the associated feature extraction calls in main. To pick and choose features in the custom analyzer, I simply commented out 
 # certain sections. I know this isn't the best coding practice, but it was fast and effective.   
+# The script requires imdb_dict.csv in addition to the training and test csv's. 
+# This script now prints out computation time. In this configuration it's about 17 seconds. 
+# The script is currently configured for combo processing and best observed performance. 
 
 class Featurizer:
 	def __init__(self):
 		# Vecotrizers for built-in or combo processing		
-		self.vectorizer = CountVectorizer(analyzer='word',ngram_range=(1,8))# analyzer='word' 'char' 'char_wb', strip_accents = 'ascii', ngram_range=(1,8), stop_words = 'english', max_df = 0.999, min_df = 0.0001
+		self.vectorizer = CountVectorizer(analyzer='word',ngram_range=(1,10),stop_words = 'english')# analyzer='word' 'char' 'char_wb', strip_accents = 'ascii', ngram_range=(1,8), stop_words = 'english', max_df = 0.999, min_df = 0.0001
 		#self.vectorizer = TfidfVectorizer(analyzer='word',ngram_range=(1,8))
 		# Vectorizers for custom analyzer feature extraction		
 		#self.vectorizer = TfidfVectorizer(analyzer=my_analyzer)
