@@ -7,6 +7,23 @@ import scipy
 import scipy.misc
 from scipy.special import psi as digam
 
+def memoize(f):
+    memo = {}
+    def helper(x):
+        if x not in memo:            
+            memo[x] = f(x)
+        return memo[x]
+    return helper
+    
+def digam_mem(n):
+	return digam(n);
+
+digam_mem = memoize(digam_mem);
+
+n0 = digam_mem(2.0);
+print n0
+n2 = digam_mem(2.0);
+print n2
 
 beta = array([[.26, .185, .185, .185, .185],
               [.185, .185, .26, .185, .185],
@@ -22,6 +39,9 @@ exp_term = digam_gam-digam_sum;
 exp_vec = exp(exp_term);
 unnorm_out = multiply(beta_word,exp_vec);
 norm_term = sum(unnorm_out)/count;
+if count==0:
+    count = 1;
+            
 phi = unnorm_out/norm_term;
 prop = 0.27711205238850234
 normalizer = sum(x * prop for x in beta[:, 0]) /2.0
